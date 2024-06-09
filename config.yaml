@@ -1,0 +1,22 @@
+server:
+  port: 8080
+  
+db:
+  host: localhost
+  port: 5432
+  user: root
+  password: secret
+  dbname: ecommerce_genai
+  sslmode: disable
+  timezone: Asia/Kolkata
+
+email:
+  from: mailtrap@ecommerce.com
+  username: api
+  password: eb42d4ceaf73da5a6e05b6e7c233c655
+  host: localhost
+  port: 1025
+
+jwt:
+  secret_key: secretecommercegenai
+  reset_password_secret_key: secretecommercegenai!&reset
