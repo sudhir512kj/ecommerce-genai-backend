@@ -34,9 +34,19 @@ func (s *echoServer) Start() {
 
 	// Create the repositories
 	userRepo := repository.NewUserRepository(s.db.GetDb())
+	productRepo := repository.NewProductRepository(s.db.GetDb())
+	categoryRepo := repository.NewCategoryRepository(s.db.GetDb())
+	productImageRepo := repository.NewProductImageRepository(s.db.GetDb())
+	cartRepo := repository.NewCartRepository(s.db.GetDb())
+	orderRepo := repository.NewOrderRepository(s.db.GetDb())
+	paymentRepo := repository.NewPaymentRepository(s.db.GetDb())
 
 	// Create the handlers
 	userHandler := handlers.NewUserHandler(userRepo)
+	productHandler := handlers.NewProductHandler(productRepo, categoryRepo, productImageRepo)
+	cartHandler := handlers.NewCartHandler(cartRepo)
+	orderHandler := handlers.NewOrderHandler(orderRepo, cartRepo, paymentRepo)
+	// paymentHandler := handlers.NewPaymentHandler(paymentRepo)
 
 	// Define the API routes
 	api := s.app.Group("/api")
@@ -50,6 +60,27 @@ func (s *echoServer) Start() {
 			// users.GET("/profile", userHandler.GetProfile)
 			users.PUT("/update-profile", userHandler.AuthMiddleware, userHandler.UpdateProfile)
 			users.POST("/verify-otp", userHandler.VerifyOTP)
+		}
+		products := api.Group("/products")
+		{
+			products.GET("/", productHandler.GetAllProducts)
+			products.GET("/:id", productHandler.GetProduct)
+			products.POST("/", productHandler.CreateProduct)
+			products.PUT("/:id", productHandler.UpdateProduct)
+			products.DELETE("/:id", productHandler.DeleteProduct)
+		}
+		carts := api.Group("/cart")
+		{
+			carts.POST("/", userHandler.AuthMiddleware, cartHandler.AddToCart)
+			carts.GET("/", userHandler.AuthMiddleware, cartHandler.GetCartInfo)
+			carts.PUT("/:id", cartHandler.UpdateCart)
+			carts.DELETE("/:id", cartHandler.DeleteFromCart)
+			carts.PUT("/:id/save-for-later", cartHandler.SaveForLater)
+		}
+		orders := api.Group("/orders")
+		{
+			// add endpoints for all handlers defined in order.go in handlers
+			orders.POST("/", orderHandler.Checkout)
 		}
 	}
 

@@ -18,6 +18,7 @@ import (
 type UserHandler struct {
 	userRepo repository.UserRepository
 	conf     *config.Config
+	cartRepo repository.CartRepository
 }
 
 func NewUserHandler(userRepo repository.UserRepository) *UserHandler {
