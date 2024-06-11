@@ -73,9 +73,9 @@ func (s *echoServer) Start() {
 		{
 			carts.POST("/", userHandler.AuthMiddleware, cartHandler.AddToCart)
 			carts.GET("/", userHandler.AuthMiddleware, cartHandler.GetCartInfo)
-			carts.PUT("/:id", cartHandler.UpdateCart)
+			carts.PUT("/:id", userHandler.AuthMiddleware, cartHandler.UpdateCart)
 			carts.DELETE("/:id", cartHandler.DeleteFromCart)
-			carts.PUT("/:id/save-for-later", cartHandler.SaveForLater)
+			carts.PUT("/:id/save-for-later", userHandler.AuthMiddleware, cartHandler.SaveForLater)
 		}
 		orders := api.Group("/orders")
 		{

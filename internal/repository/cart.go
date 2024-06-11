@@ -174,19 +174,19 @@ func (r *cartRepository) UpdateCart(ctx context.Context, userID int, cartItems [
 	defer tx.Rollback()
 
 	var cart models.Cart
-	row := tx.QueryRowContext(ctx, "SELECT id, user_id, total_amount FROM carts WHERE user_id = ?", userID)
+	row := tx.QueryRowContext(ctx, "SELECT id, user_id, total_amount FROM carts WHERE user_id = "+strconv.Itoa(userID))
 	if err := row.Scan(&cart.ID, &cart.UserID, &cart.TotalAmount); err != nil {
 		return nil, err
 	}
 
 	for _, item := range cartItems {
 		if item.Quantity == 0 {
-			_, err = tx.ExecContext(ctx, "DELETE FROM cart_items WHERE cart_id = ? AND product_id = ?", cart.ID, item.ProductID)
+			_, err = tx.ExecContext(ctx, "DELETE FROM cart_items WHERE cart_id = "+strconv.Itoa(int(cart.ID))+" AND product_id = "+strconv.Itoa(item.ProductID))
 			if err != nil {
 				return nil, err
 			}
 		} else {
-			_, err = tx.ExecContext(ctx, "INSERT INTO cart_items (cart_id, product_id, quantity) VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE quantity = ?", cart.ID, item.ProductID, item.Quantity, item.Quantity)
+			_, err = tx.ExecContext(ctx, "INSERT INTO cart_items (cart_id, product_id, quantity) VALUES ("+strconv.Itoa(int(cart.ID))+", "+strconv.Itoa(item.ProductID)+", "+strconv.Itoa(item.Quantity)+") ON CONFLICT (cart_id, product_id) DO UPDATE SET quantity = "+strconv.Itoa(item.Quantity))
 			if err != nil {
 				return nil, err
 			}
@@ -213,12 +213,12 @@ func (r *cartRepository) DeleteFromCart(ctx context.Context, userID, productID i
 	defer tx.Rollback()
 
 	var cart models.Cart
-	row := tx.QueryRowContext(ctx, "SELECT id, user_id, total_amount FROM carts WHERE user_id = ?", userID)
+	row := tx.QueryRowContext(ctx, "SELECT id, user_id, total_amount FROM carts WHERE user_id = "+strconv.Itoa(userID))
 	if err := row.Scan(&cart.ID, &cart.UserID, &cart.TotalAmount); err != nil {
 		return nil, err
 	}
 
-	_, err = tx.ExecContext(ctx, "DELETE FROM cart_items WHERE cart_id = ? AND product_id = ?", cart.ID, productID)
+	_, err = tx.ExecContext(ctx, "DELETE FROM cart_items WHERE cart_id = "+strconv.Itoa((int)(cart.ID))+" AND product_id = "+strconv.Itoa(productID))
 	if err != nil {
 		return nil, err
 	}
