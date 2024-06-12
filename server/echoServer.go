@@ -46,7 +46,6 @@ func (s *echoServer) Start() {
 	productHandler := handlers.NewProductHandler(productRepo, categoryRepo, productImageRepo)
 	cartHandler := handlers.NewCartHandler(cartRepo)
 	orderHandler := handlers.NewOrderHandler(orderRepo, cartRepo, paymentRepo)
-	// paymentHandler := handlers.NewPaymentHandler(paymentRepo)
 
 	// Define the API routes
 	api := s.app.Group("/api")
@@ -74,13 +73,16 @@ func (s *echoServer) Start() {
 			carts.POST("/", userHandler.AuthMiddleware, cartHandler.AddToCart)
 			carts.GET("/", userHandler.AuthMiddleware, cartHandler.GetCartInfo)
 			carts.PUT("/:id", userHandler.AuthMiddleware, cartHandler.UpdateCart)
-			carts.DELETE("/:id", cartHandler.DeleteFromCart)
-			carts.PUT("/:id/save-for-later", userHandler.AuthMiddleware, cartHandler.SaveForLater)
+			// carts.DELETE("/:id", cartHandler.DeleteFromCart)
+			// carts.PUT("/:id/save-for-later", userHandler.AuthMiddleware, cartHandler.SaveForLater)
 		}
 		orders := api.Group("/orders")
 		{
 			// add endpoints for all handlers defined in order.go in handlers
 			orders.POST("/", orderHandler.Checkout)
+			orders.GET("/", orderHandler.GetOrders)
+			orders.GET("/:id", orderHandler.GetOrders)
+			orders.PUT("/:id", orderHandler.CancelOrder)
 		}
 	}
 
